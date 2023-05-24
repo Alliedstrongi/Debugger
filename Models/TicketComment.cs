@@ -11,12 +11,12 @@ namespace Debugger.Models
 
 		[Display(Name = "Created Date")]
 		[DataType(DataType.DateTime)]
-		public DateTime CreatedDate { get; set; }
+		public DateTime Created { get; set; }
 
 		public int TicketId { get; set; }
 
 		[Required]
-		public string? BTUserId { get; set; }
+		public string? UserId { get; set; }
 
 		//Navigation Properties
 

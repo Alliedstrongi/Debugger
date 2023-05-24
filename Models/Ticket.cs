@@ -14,11 +14,11 @@ namespace Debugger.Models
 
 		[Display(Name = "Created Date")]
 		[DataType(DataType.DateTime)]
-		public DateTime CreatedDate { get; set; }
+		public DateTime Created { get; set; }
 
 		[Display(Name = "Updated Date")]
 		[DataType(DataType.DateTime)]
-		public DateTime UpdatedDate { get; set; }
+		public DateTime? Updated { get; set; }
 
 		public bool Archived { get; set; }
 
@@ -38,10 +38,11 @@ namespace Debugger.Models
 		public virtual TicketPriority? TicketPriority { get; set; }
 		public virtual TicketType? TicketType { get; set; }
 		public virtual TicketStatus? TicketStatus { get; set; }
-		public virtual BTUser? DeveloperUsers { get; set; }
+		public virtual BTUser? DeveloperUser { get; set; }
 		public virtual BTUser? SubmitterUser { get; set; }
 		public virtual ICollection<TicketComment> Comments { get; set; } = new HashSet<TicketComment>();
 		public virtual ICollection<TicketAttachment> Attachments { get; set; } = new HashSet<TicketAttachment>();
-		public virtual TicketHistory? TicketHistory { get; set; }
+		public virtual ICollection<TicketHistory> History { get; set; } = new HashSet<TicketHistory>();
+
 	}
 }

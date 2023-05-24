@@ -11,7 +11,7 @@ namespace Debugger.Models
 
 		[Display(Name = "Created Date")]
 		[DataType(DataType.DateTime)]
-		public DateTime CreatedDate { get; set; }
+		public DateTime Created { get; set; }
 
 		public int TicketId { get; set; }
 
@@ -19,9 +19,9 @@ namespace Debugger.Models
 		public string? BTUserId { get; set; }
 
 		[NotMapped]
-		public virtual IFormFile? ImageFile { get; set; }
-		public virtual byte[]? ImageData { get; set; }
-		public virtual string? ImageType { get; set; }
+		public virtual IFormFile? FormFile { get; set; }
+		public virtual byte[]? FileData { get; set; }
+		public virtual string? FileType { get; set; }
 
 		// Navigation Properties
 

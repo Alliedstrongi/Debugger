@@ -15,7 +15,8 @@ namespace Debugger.Models
 		[DataType(DataType.DateTime)]
 		public DateTime JoinDate { get; set; }
 		public Guid CompanyToken { get; set; }
-		public int ProjectId { get; set; }
+		public int CompanyId { get; set; }
+		public int? ProjectId { get; set; }
 
 		[Required]
 		public string? InvitorId { get; set; }

@@ -11,7 +11,7 @@ namespace Debugger.Models
 
 		[Display(Name = "Created Date")]
 		[DataType(DataType.DateTime)]
-		public DateTime? CreatedDate { get; set; }
+		public DateTime? Created { get; set; }
 
 		public string? OldValue { get; set; }
 		public string? NewValue { get; set; }

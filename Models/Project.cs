@@ -15,9 +15,9 @@ namespace Debugger.Models
 		[Required]
 		public string? Description { get; set; }
 
-		[Display(Name = "Created Date")]
+		[Display(Name = "Created")]
 		[DataType(DataType.DateTime)]
-		public DateTime CreatedDate { get; set; }
+		public DateTime Created { get; set; }
 
 		[Display(Name = "Start Date")]
 		[DataType(DataType.DateTime)]
@@ -29,9 +29,9 @@ namespace Debugger.Models
 		public int ProjectPriorityId { get; set; }
 
 		[NotMapped]
-		public virtual IFormFile? ImageFile { get; set; }
-		public virtual byte[]? ImageData { get; set; }
-		public virtual string? ImageType { get; set; }
+		public virtual IFormFile? ImageFormFile { get; set; }
+		public byte[]? ImageFileData { get; set; }
+		public string? ImageFileType { get; set; }
 		public bool Archived { get; set; }
 
 		//Navigation properties 

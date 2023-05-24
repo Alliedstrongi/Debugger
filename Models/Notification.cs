@@ -14,7 +14,7 @@ namespace Debugger.Models
 		[Required]
 		public string? Message { get; set; }
 
-		public DateTime? CreatedDate { get; set; }
+		public DateTime Created { get; set; }
 
 		[Required]
 		public string? SenderId { get; set; }

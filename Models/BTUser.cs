@@ -1,8 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.AspNetCore.Identity;
 
 namespace Debugger.Models
 {
-	public class BTUser
+	public class BTUser : IdentityUser
 	{
 		public string? FirstName { get; set; }
 		public string? LastName { get; set; }

@@ -29,7 +29,7 @@ namespace Debugger.Models
 		public int ProjectPriorityId { get; set; }
 
 		[NotMapped]
-		public virtual IFormFile? ImageFormFile { get; set; }
+		public IFormFile? ImageFormFile { get; set; }
 		public byte[]? ImageFileData { get; set; }
 		public string? ImageFileType { get; set; }
 		public bool Archived { get; set; }

@@ -17,7 +17,7 @@ namespace Debugger.Models
 
 		// Image Properties
 		[NotMapped]
-		public virtual IFormFile? ImageFormFile { get; set; }
+		public IFormFile? ImageFormFile { get; set; }
 		public byte[]? ImageFileData { get; set; }
 		public string? ImageFileType { get; set; }
 		public int CompanyId { get; set; }

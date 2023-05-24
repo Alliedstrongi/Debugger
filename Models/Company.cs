@@ -12,9 +12,9 @@ namespace Debugger.Models
 		public string? Name { get; set; }
 		public string? Description { get; set; }
 		[NotMapped]
-		public virtual IFormFile? ImageFormFile { get; set; }
-		public virtual byte[]? ImageFileData { get; set; }
-		public virtual string? ImageFileType { get; set; }
+		public IFormFile? ImageFormFile { get; set; }
+		public byte[]? ImageFileData { get; set; }
+		public string? ImageFileType { get; set; }
 
 		// Navigation properties
 

@@ -19,9 +19,9 @@ namespace Debugger.Models
 		public string? BTUserId { get; set; }
 
 		[NotMapped]
-		public virtual IFormFile? FormFile { get; set; }
-		public virtual byte[]? FileData { get; set; }
-		public virtual string? FileType { get; set; }
+		public IFormFile? FormFile { get; set; }
+		public byte[]? FileData { get; set; }
+		public string? FileType { get; set; }
 
 		// Navigation Properties
 

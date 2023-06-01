@@ -17,7 +17,7 @@ namespace Debugger.Data
 		public virtual DbSet<NotificationType> NotificationTypes { get; set; } = default!;
 		public virtual DbSet<Project> Projects { get; set; } = default!;
 		public virtual DbSet<ProjectPriority> ProjectPriorities { get; set; } = default!;
-		public virtual DbSet<Ticket> Ticket { get; set; } = default!;
+		public virtual DbSet<Ticket> Tickets { get; set; } = default!;
 		public virtual DbSet<TicketAttachment> TicketAttachments { get; set; } = default!;
 		public virtual DbSet<TicketComment> TicketComments { get; set; } = default!;
 		public virtual DbSet<TicketHistory> TicketHistories { get; set; } = default!;

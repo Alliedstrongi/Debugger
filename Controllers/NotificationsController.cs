@@ -56,7 +56,7 @@ namespace Debugger.Controllers
             ViewData["ProjectId"] = new SelectList(_context.Projects, "Id", "Description");
             ViewData["RecipientId"] = new SelectList(_context.Users, "Id", "Id");
             ViewData["SenderId"] = new SelectList(_context.Users, "Id", "Id");
-            ViewData["TicketId"] = new SelectList(_context.Ticket, "Id", "Description");
+            ViewData["TicketId"] = new SelectList(_context.Tickets, "Id", "Description");
             return View();
         }
 
@@ -77,7 +77,7 @@ namespace Debugger.Controllers
             ViewData["ProjectId"] = new SelectList(_context.Projects, "Id", "Description", notification.ProjectId);
             ViewData["RecipientId"] = new SelectList(_context.Users, "Id", "Id", notification.RecipientId);
             ViewData["SenderId"] = new SelectList(_context.Users, "Id", "Id", notification.SenderId);
-            ViewData["TicketId"] = new SelectList(_context.Ticket, "Id", "Description", notification.TicketId);
+            ViewData["TicketId"] = new SelectList(_context.Tickets, "Id", "Description", notification.TicketId);
             return View(notification);
         }
 
@@ -98,7 +98,7 @@ namespace Debugger.Controllers
             ViewData["ProjectId"] = new SelectList(_context.Projects, "Id", "Description", notification.ProjectId);
             ViewData["RecipientId"] = new SelectList(_context.Users, "Id", "Id", notification.RecipientId);
             ViewData["SenderId"] = new SelectList(_context.Users, "Id", "Id", notification.SenderId);
-            ViewData["TicketId"] = new SelectList(_context.Ticket, "Id", "Description", notification.TicketId);
+            ViewData["TicketId"] = new SelectList(_context.Tickets, "Id", "Description", notification.TicketId);
             return View(notification);
         }
 
@@ -138,7 +138,7 @@ namespace Debugger.Controllers
             ViewData["ProjectId"] = new SelectList(_context.Projects, "Id", "Description", notification.ProjectId);
             ViewData["RecipientId"] = new SelectList(_context.Users, "Id", "Id", notification.RecipientId);
             ViewData["SenderId"] = new SelectList(_context.Users, "Id", "Id", notification.SenderId);
-            ViewData["TicketId"] = new SelectList(_context.Ticket, "Id", "Description", notification.TicketId);
+            ViewData["TicketId"] = new SelectList(_context.Tickets, "Id", "Description", notification.TicketId);
             return View(notification);
         }
 

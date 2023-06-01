@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using Debugger.Models;
+using Debugger.Models.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Debugger.Controllers

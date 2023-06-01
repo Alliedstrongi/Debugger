@@ -50,7 +50,7 @@ namespace Debugger.Controllers
         public IActionResult Create()
         {
             ViewData["BTUserId"] = new SelectList(_context.Users, "Id", "Id");
-            ViewData["TicketId"] = new SelectList(_context.Ticket, "Id", "Description");
+            ViewData["TicketId"] = new SelectList(_context.Tickets, "Id", "Description");
             return View();
         }
 
@@ -68,7 +68,7 @@ namespace Debugger.Controllers
                 return RedirectToAction(nameof(Index));
             }
             ViewData["BTUserId"] = new SelectList(_context.Users, "Id", "Id", ticketAttachment.BTUserId);
-            ViewData["TicketId"] = new SelectList(_context.Ticket, "Id", "Description", ticketAttachment.TicketId);
+            ViewData["TicketId"] = new SelectList(_context.Tickets, "Id", "Description", ticketAttachment.TicketId);
             return View(ticketAttachment);
         }
 
@@ -86,7 +86,7 @@ namespace Debugger.Controllers
                 return NotFound();
             }
             ViewData["BTUserId"] = new SelectList(_context.Users, "Id", "Id", ticketAttachment.BTUserId);
-            ViewData["TicketId"] = new SelectList(_context.Ticket, "Id", "Description", ticketAttachment.TicketId);
+            ViewData["TicketId"] = new SelectList(_context.Tickets, "Id", "Description", ticketAttachment.TicketId);
             return View(ticketAttachment);
         }
 
@@ -123,7 +123,7 @@ namespace Debugger.Controllers
                 return RedirectToAction(nameof(Index));
             }
             ViewData["BTUserId"] = new SelectList(_context.Users, "Id", "Id", ticketAttachment.BTUserId);
-            ViewData["TicketId"] = new SelectList(_context.Ticket, "Id", "Description", ticketAttachment.TicketId);
+            ViewData["TicketId"] = new SelectList(_context.Tickets, "Id", "Description", ticketAttachment.TicketId);
             return View(ticketAttachment);
         }
 

@@ -152,7 +152,7 @@ namespace Debugger.Controllers
 				{
 					return NotFound();
 				}
-			}0
+			}
 
 			List<Project> projects = await _context.Projects.Where(c => c.CompanyId == user!.CompanyId).ToListAsync();
 

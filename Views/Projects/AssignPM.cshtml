@@ -12,20 +12,16 @@
         <div class="card-body">
             <form asp-action="AssignPM" method="post" class="d-flex flex-column">
                 <input type="hidden" asp-for="Project!.Id" />
-                
                 <select asp-items="Model.PMList" asp-for="PMId">
                     <option value="">Unassigned</option>
                 </select>
-
                 <button type="submit" class="btn btn-primary my-3">Save</button>
-                <a asp-action="Details" asp-route-id="@Model.Project!.Id" class="btn btn-secondary">Cancel</a>
+                <a asp-action="Details" asp-route-id="@Model.Project.Id" class="btn btn-secondary">Cancel</a>
             </form>
         </div>
     </div>
 </div>
 
 @section Scripts {
-    @{
-        await Html.RenderPartialAsync("_ValidationScriptsPartial");
-    }
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
 }

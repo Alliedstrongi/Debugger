@@ -15,8 +15,9 @@ namespace Debugger.Services.Interfaces
         Task ArchiveProjectAsync(Project project, int companyId);
         Task RestoreProjectAsync(Project project, int companyId);
         Task UpdateProjectAsync(Project project, int companyId);
-        Task<BTUser?> GetProjectMangerAsync(int projectId, int companyId);
+        Task<BTUser?> GetProjectManagerAsync(int projectId, int companyId);
         Task<bool> AddProjectManagerAsync(string userId, int projectId, int companyId);
         Task RemoveProjectManagerAsync(int projectId, int companyId);
+        Task<List<Project>> GetUnassignedProjectsByCompanyIdAsync(int companyId);
     }
 }

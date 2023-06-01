@@ -136,10 +136,20 @@ namespace Debugger.Services
 
 		public async Task RestoreTicketAsync(Ticket ticket, int companyId)
 		{
-			ticket.Archived = false;
-			ticket.ArchivedByProject = false;
-			await _context.SaveChangesAsync();
-		}
+            try
+            {
+                var existingTicket = await GetTicketByIdAsync(ticket.Id, companyId);
+                if (existingTicket != null)
+                {
+                    existingTicket.Archived = false;
+                    await _context.SaveChangesAsync();
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
 
 		public async Task UpdateTicketAsync(Ticket ticket, int companyId)
 		{

@@ -138,7 +138,8 @@ namespace Debugger.Services
             {
 
                 throw;
-            }        }
+            }        
+        }
 
         public async Task<List<Project>> GetArchivedProjectsByCompanyIdAsync(int companyId)
         {
@@ -153,7 +154,8 @@ namespace Debugger.Services
             {
 
                 throw;
-            }        }
+            }        
+        }
 
 
         public async Task<Project?> GetProjectByIdAsync(int projectId, int companyId)
@@ -315,6 +317,21 @@ namespace Debugger.Services
 
                 throw;
             }
+        }
+
+        public Task<List<BTUser>> GetProjectMembersByRoleAsync(int projectId, string roleName, int companyId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<bool> AddMemberToProjectAsync(BTUser member, int projectId, int companyId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<bool> RemoveMemberFromProjectAsync(BTUser member, int projectId, int companyId)
+        {
+            throw new NotImplementedException();
         }
     }
 }

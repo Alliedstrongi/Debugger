@@ -48,7 +48,7 @@ namespace Debugger.Controllers
             List<Project> projects = await _projectService.GetAllUserProjectsAsync(_userManager.GetUserId(User)!);
 
             ViewData["Title"] = "My Projects";
-            return View(nameof(Index), projects);
+            return View(nameof(MyProjects), projects);
         }
 
         public async Task<IActionResult> AllProjects()
@@ -64,7 +64,7 @@ namespace Debugger.Controllers
             List<Project> projects = await _projectService.GetArchivedProjectsByCompanyIdAsync(User.Identity!.GetCompanyId());
 
             ViewData["Title"] = "Archived Projects";
-            return View(nameof(Index), projects);
+            return View(nameof(ArchivedProjects), projects);
         }
 
         public async Task<IActionResult> UnassignedProjects()

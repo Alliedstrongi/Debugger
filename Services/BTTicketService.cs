@@ -157,32 +157,30 @@ namespace Debugger.Services
 			_context.Update(ticket);
 			await _context.SaveChangesAsync();
 		}
+     //   public async Task<List<Ticket>> GetUnassignedTicketsByCompanyIdAsync(int companyId)
+     //   {
+     //       try
+     //       {
+     //           List<Ticket> allTickets = await GetTicketsByCompanyIdAsync(companyId);
+     //           List<Ticket> unassignedTickets = new();
 
-/*
-        public async Task<List<Ticket>> GetUnassignedTicketsByCompanyIdAsync(int companyId)
-        {
-            try
-            {
-                List<Ticket> allTickets = await GetTicketsByCompanyIdAsync(companyId);
-                List<Ticket> unassignedTickets = new();
-
-                foreach (Ticket ticket in allTickets)
-                {
+     //           foreach (Ticket ticket in allTickets)
+     //           {
 
 					//Get the dev Id
-                    BTUser? ticketManager = await GetTicketManagerAsync(ticket.Id, companyId);
+     //               BTUser? ticketManager = await GetTicketManagerAsync(ticket.Id, companyId);
 
 
 					//Changer manager to dev ID
-                    if (ticketManager is null) unassignedTickets.Add(ticket);
-                }
-                return unassignedTickets;
-            }
-            catch (Exception)
-            {
+     //               if (ticketManager is null) unassignedTickets.Add(ticket);
+     //           }
+     //           return unassignedTickets;
+     //       }
+     //       catch (Exception)
+     //       {
 
-                throw;
-            }
-        } */
+     //           throw;
+     //       }
+     //   } 
     }
 }

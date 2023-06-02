@@ -108,8 +108,6 @@ namespace Debugger.Services
                 .ToListAsync();
         }
 
-
-
         public async Task<List<Project>> GetArchivedProjectsByCompanyIdAsync(int companyId)
         {
             return await _context.Projects

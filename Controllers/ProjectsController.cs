@@ -71,7 +71,7 @@ namespace Debugger.Controllers
         {
             List<Project> projects = await _projectService.GetUnassignedProjectsByCompanyIdAsync(User.Identity!.GetCompanyId());
 
-            ViewData["Title"] = "Archived Projects";
+            ViewData["Title"] = "Unassigned Projects";
             return View(nameof(Index), projects);
         }
 

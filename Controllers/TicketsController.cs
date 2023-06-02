@@ -41,8 +41,40 @@ namespace Debugger.Controllers
 			return View(tickets);
 		}
 
-		// GET: Tickets/Details/5
-		public async Task<IActionResult> Details(int? id)
+        public async Task<IActionResult> MyTickets()
+		{
+            List<Ticket> tickets = await _ticketService.GetTicketsByUserIdAsync(_userManager.GetUserId(User)!);
+
+            ViewData["Title"] = "My Tickets";
+            return View(nameof(Index), tickets);
+        }
+
+        public async Task<IActionResult> ArchivedTickets()
+        {
+            List<Ticket> tickets = await _ticketService.GetArchivedTicketsAsync(User.Identity!.GetCompanyId());
+
+            ViewData["Title"] = "Archived Tickets";
+            return View(nameof(Index), tickets);
+        }
+
+        public async Task<IActionResult> AllTickets()
+        {
+            List<Ticket> tickets = await _ticketService.GetTicketsByCompanyIdAsync(User.Identity!.GetCompanyId());
+
+            ViewData["Title"] = "All Tickets";
+            return View(nameof(Index), tickets);
+        }
+
+        public async Task<IActionResult> UnassignedTickets()
+        {
+            List<Ticket> tickets = await _ticketService.GetTicketsByCompanyIdAsync(User.Identity!.GetCompanyId());
+
+            ViewData["Title"] = "Unassigned Tickets";
+            return View(nameof(Index), tickets);
+        }
+
+        // GET: Tickets/Details/5
+        public async Task<IActionResult> Details(int? id)
 		{
 			if (id == null || _context.Tickets == null)
 			{

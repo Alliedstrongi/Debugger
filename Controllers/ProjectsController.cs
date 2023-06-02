@@ -272,27 +272,30 @@ namespace Debugger.Controllers
 
         // GET: Projects/Archive/5
         [Authorize(Roles = $"{nameof(BTRoles.Admin)}, {nameof(BTRoles.ProjectManager)}")]
-        public async Task<IActionResult> Delete(int? id)
+        public async Task<IActionResult> Archive(int? id)
         {
-            if (id == null)
+            try
             {
-                return NotFound();
+                if (id == null)
+                {
+                    return NotFound();
+                }
+
+                int companyId = User.Identity!.GetCompanyId();
+                var project = await _projectService.GetProjectByIdAsync(id.Value, companyId);
+
+                if (project == null)
+                {
+                    return NotFound();
+                }
+
+                return View(project);
             }
-
-            BTUser? user = await _userManager.GetUserAsync(User);
-
-            var project = await _context.Projects
-                .Where(c => c.CompanyId == user!.CompanyId)
-                .Include(p => p.Company)
-                .Include(p => p.ProjectPriority)
-                .FirstOrDefaultAsync(m => m.Id == id);
-
-            if (project == null)
+            catch (Exception)
             {
-                return NotFound();
-            }
 
-            return View(project);
+                throw;
+            }
         }
 
         // POST: Projects/Archive/5
@@ -301,25 +304,29 @@ namespace Debugger.Controllers
         [Authorize(Roles = $"{nameof(BTRoles.Admin)}, {nameof(BTRoles.ProjectManager)}")]
         public async Task<IActionResult> ArchiveConfirmed(int id)
         {
-            if (_context.Projects == null)
+            try
             {
-                return Problem("Entity set 'ApplicationDbContext.Projects'  is null.");
+                int companyId = User.Identity!.GetCompanyId();
+                var project = await _projectService.GetProjectByIdAsync(id, companyId);
+
+                if (project != null)
+                {
+                    project.Archived = true;
+                }
+
+                await _projectService.ArchiveProjectAsync(project!, companyId);
+                return RedirectToAction(nameof(Index));
             }
-
-            var project = await _context.Projects.FindAsync(id);
-
-            if (project != null)
+            catch (Exception)
             {
-                project.Archived = true;
-            }
 
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+                throw;
+            }
         }
 
         private bool ProjectExists(int id)
         {
             return (_context.Projects?.Any(e => e.Id == id)).GetValueOrDefault();
-        }
+        } 
     }
 }

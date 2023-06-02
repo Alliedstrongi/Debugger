@@ -23,9 +23,17 @@ namespace Debugger.Services
 
         public async Task AddProjectAsync(Project project)
         {
-            _context.Projects.Add(project);
-            await _context.SaveChangesAsync();
-        }
+            try
+            {
+                _context.Projects.Add(project);
+                await _context.SaveChangesAsync();
+
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }        }
 
         public async Task<bool> AddProjectManagerAsync(string userId, int projectId, int companyId)
         {
@@ -88,32 +96,64 @@ namespace Debugger.Services
 
         public async Task<List<Project>> GetAllProjectsByCompanyIdAsync(int companyId)
         {
-            return await _context.Projects
-                .Where(p => p.CompanyId == companyId)
-                .ToListAsync();
-        }
+            try
+            {
+                return await _context.Projects
+            .Where(p => p.CompanyId == companyId)
+            .ToListAsync();
+
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }        }
 
 
         public async Task<List<Project>> GetAllProjectsByPriorityAsync(int companyId, string priority)
         {
-            return await _context.Projects
-                .Where(p => p.CompanyId == companyId && p.ProjectPriority!.Name == priority)
-                .ToListAsync();
-        }
+            try
+            {
+                return await _context.Projects
+            .Where(p => p.CompanyId == companyId && p.ProjectPriority!.Name == priority)
+            .ToListAsync();
+
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }        }
 
         public async Task<List<Project>> GetAllUserProjectsAsync(string userId)
         {
-            return await _context.Projects
-                .Where(p => p.Members.Any(m => m.Id == userId))
-                .ToListAsync();
-        }
+            try
+            {
+                return await _context.Projects
+            .Where(p => p.Members.Any(m => m.Id == userId))
+            .ToListAsync();
+
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }        }
 
         public async Task<List<Project>> GetArchivedProjectsByCompanyIdAsync(int companyId)
         {
-            return await _context.Projects
-                .Where(p => p.CompanyId == companyId && p.Archived == true)
-                .ToListAsync();
-        }
+            try
+            {
+                return await _context.Projects
+            .Where(p => p.CompanyId == companyId && p.Archived == true)
+            .ToListAsync();
+
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }        }
 
 
         public async Task<Project?> GetProjectByIdAsync(int projectId, int companyId)
@@ -168,8 +208,16 @@ namespace Debugger.Services
 
         public async Task<List<ProjectPriority>> GetProjectPrioritiesAsync()
         {
-            List<ProjectPriority> priorities = await _context.ProjectPriorities.ToListAsync();
-            return priorities;
+            try
+            {
+                List<ProjectPriority> priorities = await _context.ProjectPriorities.ToListAsync();
+                return priorities;
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
         }
 
         public async Task RemoveProjectManagerAsync(int projectId, int companyId)

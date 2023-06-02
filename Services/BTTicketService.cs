@@ -158,95 +158,7 @@ namespace Debugger.Services
 			await _context.SaveChangesAsync();
 		}
 
-/*        public async Task<bool> AddProjectManagerAsync(string userId, int projectId, int companyId)
-        {
-            try
-            {
-                Project? project = await _context.Projects.Include(p => p.Members).FirstOrDefaultAsync(p => p.Id == projectId && p.CompanyId == companyId);
-
-                BTUser? projectManager = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId && u.CompanyId == companyId);
-
-                if (project is not null && projectManager is not null)
-                {
-                    if (!await _rolesService.IsUserInRole(projectManager, nameof(BTRoles.ProjectManager))) return false;
-
-                    await RemoveProjectManagerAsync(projectId, companyId);
-
-                    project.Members.Add(projectManager);
-                    await _context.SaveChangesAsync();
-
-                    return true;
-                }
-
-            }
-            catch (Exception)
-            {
-
-                throw;
-            }
-            return false;
-        }
-
-        public async Task<BTUser?> GetProjectManagerAsync(int projectId, int companyId)
-        {
-            try
-            {
-                Project? project = await _context.Projects
-                                                .AsNoTracking()
-                                                .Include(p => p.Members)
-                                                .FirstOrDefaultAsync(p => p.Id == projectId && p.CompanyId == companyId);
-
-                if (project is not null)
-                {
-                    foreach (BTUser member in project.Members)
-                    {
-                        if (await _rolesService.IsUserInRole(member, nameof(BTRoles.ProjectManager)))
-                        {
-                            return member;
-                        }
-                    }
-                }
-
-                return null;
-            }
-            catch (Exception)
-            {
-
-                throw;
-            }
-        }
-
-        public async Task RemoveProjectManagerAsync(int projectId, int companyId)
-        {
-            try
-            {
-                Project? project = await _context.Projects
-                                                 .Include(p => p.Members)
-                                                 .FirstOrDefaultAsync(p => p.Id == projectId && p.CompanyId == companyId);
-
-                if (project is not null)
-                {
-                    foreach (BTUser member in project.Members)
-                    {
-                        if (await _rolesService.IsUserInRole(member, nameof(BTRoles.ProjectManager)))
-                        {
-                            project.Members.Remove(member);
-                        }
-                    }
-
-                    await _context.SaveChangesAsync();
-                }
-
-
-
-            }
-            catch (Exception)
-            {
-
-                throw;
-            }
-        }
-
+/*
         public async Task<List<Ticket>> GetUnassignedTicketsByCompanyIdAsync(int companyId)
         {
             try
@@ -256,8 +168,12 @@ namespace Debugger.Services
 
                 foreach (Ticket ticket in allTickets)
                 {
+
+					//Get the dev Id
                     BTUser? ticketManager = await GetTicketManagerAsync(ticket.Id, companyId);
 
+
+					//Changer manager to dev ID
                     if (ticketManager is null) unassignedTickets.Add(ticket);
                 }
                 return unassignedTickets;

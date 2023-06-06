@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Security.Cryptography.X509Certificates;
 
@@ -18,8 +19,12 @@ namespace Debugger.Models
 		[Required]
 		public string? BTUserId { get; set; }
 
-		[NotMapped]
-		public IFormFile? FormFile { get; set; }
+        [NotMapped]
+        [DisplayName("Select a file")]
+        [DataType(DataType.Upload)]
+        [MaxFileSize(1024 * 1024)]
+        [AllowedExtensions(new string[] { ".jpg", ".png", ".doc", ".docx", ".xls", ".xlsx", ".pdf" })]
+        public IFormFile FormFile { get; set; }
 		public byte[]? FileData { get; set; }
 		public string? FileType { get; set; }
 

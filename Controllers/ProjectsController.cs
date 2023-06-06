@@ -17,14 +17,14 @@ using Debugger.Services;
 
 namespace Debugger.Controllers
 {
-	[Authorize]
-	public class ProjectsController : Controller
-	{
-		private readonly ApplicationDbContext _context;
-		private readonly UserManager<BTUser> _userManager;
-		private readonly IBTFileService _fileService;
-		private readonly IBTProjectService _projectService;
-		private readonly IBTRolesService _rolesService;
+    [Authorize]
+    public class ProjectsController : Controller
+    {
+        private readonly ApplicationDbContext _context;
+        private readonly UserManager<BTUser> _userManager;
+        private readonly IBTFileService _fileService;
+        private readonly IBTProjectService _projectService;
+        private readonly IBTRolesService _rolesService;
 
 
         public ProjectsController(ApplicationDbContext context, UserManager<BTUser> userManager, IBTFileService fileService, IBTRolesService rolesService, IBTProjectService projectService)
@@ -327,6 +327,6 @@ namespace Debugger.Controllers
         private bool ProjectExists(int id)
         {
             return (_context.Projects?.Any(e => e.Id == id)).GetValueOrDefault();
-        } 
+        }
     }
 }

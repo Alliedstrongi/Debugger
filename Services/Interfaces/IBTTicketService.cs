@@ -16,5 +16,10 @@ namespace Debugger.Services.Interfaces
         Task RestoreTicketAsync(Ticket ticket, int companyId);
         Task UpdateTicketAsync(Ticket ticket, int companyId);
         Task<List<Ticket>> GetTicketsByUserIdAsync(string userId);
+        Task AddTicketAttachmentAsync(TicketAttachment ticketAttachment);
+        Task<List<Ticket>> GetUnassignedTicketsAsync(int companyId);
+        Task AddTicketCommentAsync(TicketComment comment);
+        Task<TicketAttachment?> GetTicketAttachmentByIdAsync(int ticketAttachmentId);
+        Task<Ticket?> GetTicketAsNoTrackingAsync(int ticketId, int companyId);
     }
 }

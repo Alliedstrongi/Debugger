@@ -15,127 +15,100 @@ namespace Debugger.Services
 		private readonly ApplicationDbContext _context;
 		private readonly IBTRolesService _rolesService;
 
-		public BTTicketService(ApplicationDbContext context, IBTRolesService rolesService)
-		{
-			_context = context;
-			_rolesService = rolesService;
-		}
+        public BTTicketService(ApplicationDbContext context, IBTRolesService rolesService)
+        {
+            _context = context;
+            _rolesService = rolesService;
+        }
 
-		public async Task AddTicketAsync(Ticket ticket)
-		{
-			_context.Add(ticket);
-			await _context.SaveChangesAsync();
-		}
+        public async Task AddTicketAsync(Ticket ticket)
+        {
+            _context.Tickets.Add(ticket);
+            await _context.SaveChangesAsync();
+        }
 
-		public async Task ArchiveTicketAsync(Ticket ticket, int companyId)
-		{
-			ticket.Archived = true;
-			ticket.ArchivedByProject = true;
-			await _context.SaveChangesAsync();
-		}
+        public async Task ArchiveTicketAsync(Ticket ticket, int companyId)
+        {
+            try
+            {
+                var existingTicket = await GetTicketByIdAsync(ticket.Id, companyId);
+                if (existingTicket != null)
+                {
+                    existingTicket.Archived = true;
+                    await _context.SaveChangesAsync();
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+        public async Task<List<Ticket>> GetArchivedTicketsAsync(int companyId)
+        {
+            try
+            {
+                return await _context.Tickets.Where(t => t.Project!.CompanyId == companyId && t.Archived == true).ToListAsync();
 
-		public async Task<List<Ticket>> GetArchivedTicketsAsync(int companyId)
-		{
-			return await _context.Tickets
-				.Where(t => t.Project.CompanyId == companyId && t.Archived)
-				.Include(t => t.DeveloperUser)
-				.Include(t => t.Project)
-				.Include(t => t.SubmitterUser)
-				.Include(t => t.TicketPriority)
-				.Include(t => t.TicketStatus)
-				.Include(t => t.TicketType)
-				.ToListAsync();
-		}
+            }
+            catch (Exception)
+            {
 
-		public async Task<Ticket?> GetTicketByIdAsync(int ticketId, int companyId)
-		{
-			return await _context.Tickets
-				.Where(t => t.Project.CompanyId == companyId)
-				.Include(t => t.DeveloperUser)
-				.Include(t => t.Project)
-				.Include(t => t.SubmitterUser)
-				.Include(t => t.TicketPriority)
-				.Include(t => t.TicketStatus)
-				.Include(t => t.TicketType)
-				.FirstOrDefaultAsync(t => t.Id == ticketId);
-		}
+                throw;
+            }
+        }
+        public async Task<List<Ticket>> GetTicketsByCompanyIdAsync(int companyId)
+        {
+            try
+            {
+                return await _context.Tickets.Where(t => t.Project!.CompanyId == companyId).ToListAsync();
+            }
+            catch (Exception)
+            {
 
-		public async Task<List<TicketPriority>> GetTicketPriorities()
-		{
-			return await _context.TicketPriorities.ToListAsync();
-		}
+                throw;
+            }
+        }
 
-		public async Task<List<Ticket>> GetTicketsByCompanyIdAsync(int companyId)
-		{
-			return await _context.Tickets
-				.Where(t => t.Project.CompanyId == companyId && !t.Archived)
-				.Include(t => t.DeveloperUser)
-				.Include(t => t.Project)
-				.Include(t => t.SubmitterUser)
-				.Include(t => t.TicketPriority)
-				.Include(t => t.TicketStatus)
-				.Include(t => t.TicketType)
-				.ToListAsync();
-		}
+        public async Task<Ticket?> GetTicketByIdAsync(int ticketId, int companyId)
+        {
+            try
+            {
+                return await _context.Tickets.FirstOrDefaultAsync(t => t.Id == ticketId && t.Project!.CompanyId == companyId);
 
-		public async Task<List<Ticket>> GetTicketsByUserIdAsync(string userId)
-		{
-			try
-			{
-				BTUser? user = await _context.Users.FindAsync(userId);
-				if (user is null) return new List<Ticket>();
+            }
+            catch (Exception)
+            {
 
-				if (await _rolesService.IsUserInRole(user, nameof(BTRoles.Admin)))
-				{
-					return await GetTicketsByCompanyIdAsync(user.CompanyId);
-				}
-				else if(await _rolesService.IsUserInRole(user, nameof(BTRoles.ProjectManager)))
-				{
-					return await _context.Tickets
-										 .Include(t => t.TicketType)
-										 .Include(t => t.TicketStatus)
-										 .Include(t => t.TicketPriority)
-										 .Include(t => t.SubmitterUser)
-										 .Include(t => t.DeveloperUser)
-										 .Include(t => t.Project)
-											.ThenInclude(p => p!.Members)
-										 .Where(t => !t.Archived && t.Project!.Members.Contains(user))
-										 .ToListAsync();
-				}
-				else
-				{
-					return await _context.Tickets
-										 .Include(t => t.TicketType)
-										 .Include(t => t.TicketStatus)
-										 .Include(t => t.TicketPriority)
-										 .Include(t => t.SubmitterUser)
-										 .Include(t => t.DeveloperUser)
-										 .Include(t => t.Project)
-											.ThenInclude(p => p!.Members)
-										 .Where(t => !t.Archived && (t.DeveloperUserId == userId || t.SubmitterUserId == userId))
-										 .ToListAsync();
-				}
+                throw;
+            }        }
+        public async Task<List<TicketType>> GetTicketTypes()
+        {
+            try
+            {
+                return await _context.TicketTypes.ToListAsync();
 
-			}
-			catch (Exception)
-			{
+            }
+            catch (Exception)
+            {
 
-				throw;
-			}
-		}
+                throw;
+            }        }
 
-		public async Task<List<TicketStatus>> GetTicketStatuses()
-		{
-			return await _context.TicketStatuses.ToListAsync();
-		}
+        public async Task<List<TicketPriority>> GetTicketPriorities()
+        {
+            try
+            {
+                return await _context.TicketPriorities.ToListAsync();
 
-		public async Task<List<TicketType>> GetTicketTypes()
-		{
-			return await _context.TicketTypes.ToListAsync();
-		}
+            }
+            catch (Exception)
+            {
 
-		public async Task RestoreTicketAsync(Ticket ticket, int companyId)
-		{
+                throw;
+            }        }
+
+        public async Task RestoreTicketAsync(Ticket ticket, int companyId)
+        {
             try
             {
                 var existingTicket = await GetTicketByIdAsync(ticket.Id, companyId);
@@ -149,38 +122,109 @@ namespace Debugger.Services
             {
                 throw;
             }
+
         }
 
-		public async Task UpdateTicketAsync(Ticket ticket, int companyId)
-		{
-			ticket.Updated = DateTime.UtcNow;
-			_context.Update(ticket);
-			await _context.SaveChangesAsync();
-		}
-     //   public async Task<List<Ticket>> GetUnassignedTicketsByCompanyIdAsync(int companyId)
-     //   {
-     //       try
-     //       {
-     //           List<Ticket> allTickets = await GetTicketsByCompanyIdAsync(companyId);
-     //           List<Ticket> unassignedTickets = new();
+        public async Task UpdateTicketAsync(Ticket ticket, int companyId)
+        {
+            if (await _context.Projects.AnyAsync(p => p.CompanyId == companyId && p.Id == ticket.ProjectId))
+            {
+                _context.Update(ticket);
+                await _context.SaveChangesAsync();
+            }
+            else
+            {
+                throw new InvalidOperationException("Project not found");
+            }
 
-     //           foreach (Ticket ticket in allTickets)
-     //           {
+        }
 
-					//Get the dev Id
-     //               BTUser? ticketManager = await GetTicketManagerAsync(ticket.Id, companyId);
+        public async Task<List<Ticket>> GetTicketsByUserIdAsync(string userId)
+        {
+            try
+            {
+                BTUser? user = await _context.Users.FindAsync(userId);
+                if (user is null) return new List<Ticket>();
 
+                //admin
+                if (await _rolesService.IsUserInRole(user, nameof(BTRoles.Admin)))
+                {
+                    return await GetTicketsByCompanyIdAsync(user.CompanyId);
+                }
+                //PM
+                else if (await _rolesService.IsUserInRole(user, nameof(BTRoles.ProjectManager)))
+                {
+                    return await _context.Tickets
+                                         .Include(t => t.TicketStatus)
+                                         .Include(t => t.TicketType)
+                                         .Include(t => t.TicketPriority)
+                                         .Include(t => t.SubmitterUser)
+                                         .Include(t => t.DeveloperUser)
+                                         .Include(t => t.Project)
+                                            .ThenInclude(p => p.Members)
+                                         .Where(t => !t.Archived && t.Project!.Members.Contains(user))
+                                         .ToListAsync();
+                }
+                else
+                {
+                    return await _context.Tickets
+                                         .Include(t => t.TicketStatus)
+                                         .Include(t => t.TicketType)
+                                         .Include(t => t.TicketPriority)
+                                         .Include(t => t.SubmitterUser)
+                                         .Include(t => t.DeveloperUser)
+                                         .Include(t => t.Project)
+                                            .ThenInclude(p => p.Members)
+                                         .Where(t => !t.Archived && (t.DeveloperUserId == userId || t.SubmitterUserId == userId))
+                                         .ToListAsync();
+                }
+            }
+            catch (Exception)
+            {
 
-					//Changer manager to dev ID
-     //               if (ticketManager is null) unassignedTickets.Add(ticket);
-     //           }
-     //           return unassignedTickets;
-     //       }
-     //       catch (Exception)
-     //       {
+                throw;
+            }
+        }
 
-     //           throw;
-     //       }
-     //   } 
+        public async Task<List<TicketStatus>> GetTicketStatuses()
+        {
+            try
+            {
+                return await _context.TicketStatuses.ToListAsync();
+
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }        }
+
+        public async Task<Ticket?> GetTicketAsNoTrackingAsync(int ticketId, int companyId)
+        {
+            return await _context.Tickets
+                .AsNoTracking()
+                .Include(t => t.Project)
+                .FirstOrDefaultAsync(t => t.Id == ticketId && t.Project.CompanyId == companyId);
+        }
+
+        public Task AddTicketAttachmentAsync(TicketAttachment ticketAttachment)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<List<Ticket>> GetUnassignedTicketsAsync(int companyId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task AddTicketCommentAsync(TicketComment comment)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<TicketAttachment?> GetTicketAttachmentByIdAsync(int ticketAttachmentId)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using Debugger.Data;
 using Debugger.Models;
+using Debugger.Models.Enums;
 using Debugger.Services.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -38,7 +39,7 @@ namespace Debugger.Services
         {
             try
             {
-                return await _context.Roles.ToListAsync();
+                return await _context.Roles.Where(r => r.Name != nameof(BTRoles.DemoUser)).ToListAsync();
             }
             catch (Exception)
             {

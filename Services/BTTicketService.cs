@@ -2,6 +2,7 @@
 using Debugger.Models;
 using Debugger.Models.Enums;
 using Debugger.Services.Interfaces;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -10,21 +11,51 @@ using System.Threading.Tasks;
 
 namespace Debugger.Services
 {
-	public class BTTicketService : IBTTicketService
-	{
-		private readonly ApplicationDbContext _context;
-		private readonly IBTRolesService _rolesService;
+    public class BTTicketService : IBTTicketService
+    {
+        private readonly ApplicationDbContext _context;
+        private readonly IBTRolesService _rolesService;
+        private readonly UserManager<BTUser> _userManager;
 
-        public BTTicketService(ApplicationDbContext context, IBTRolesService rolesService)
+        public BTTicketService(ApplicationDbContext context, IBTRolesService rolesService, UserManager<BTUser> userManager)
         {
             _context = context;
             _rolesService = rolesService;
+            _userManager = userManager;
         }
 
         public async Task AddTicketAsync(Ticket ticket)
         {
             _context.Tickets.Add(ticket);
             await _context.SaveChangesAsync();
+        }
+        public async Task<bool> AddTicketDeveloperAsync(string userId, int ticketId, int companyId)
+        {
+            try
+            {
+                Ticket? ticket = await _context.Tickets.Include(t => t.Project!.Members).FirstOrDefaultAsync(t => t.Id == ticketId && t.Project!.CompanyId == companyId);
+
+                BTUser? ticketDeveloper = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId && u.CompanyId == companyId);
+
+                if (ticket is not null && ticketDeveloper is not null)
+                {
+                    if (!await _rolesService.IsUserInRole(ticketDeveloper, nameof(BTRoles.Developer))) return false;
+
+                    await RemoveTicketDeveloperAsync(ticketId, companyId);
+
+                    ticket.Project!.Members.Add(ticketDeveloper);
+                    await _context.SaveChangesAsync();
+
+                    return true;
+                }
+
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+            return false;
         }
 
         public async Task ArchiveTicketAsync(Ticket ticket, int companyId)
@@ -58,9 +89,35 @@ namespace Debugger.Services
         }
         public async Task<List<Ticket>> GetTicketsByCompanyIdAsync(int companyId)
         {
+            return await _context.Tickets.Where(t => t.Project!.CompanyId == companyId).ToListAsync();
+        }
+
+        public async Task<Ticket?> GetTicketByIdAsync(int ticketId, int companyId)
+        {
+            return await _context.Tickets.FirstOrDefaultAsync(t => t.Id == ticketId && t.Project!.CompanyId == companyId);
+        }
+
+        public async Task<BTUser?> GetTicketDeveloperAsync(int ticketId, int companyId)
+        {
             try
             {
-                return await _context.Tickets.Where(t => t.Project!.CompanyId == companyId).ToListAsync();
+                Ticket? ticket = await _context.Tickets
+                                                .AsNoTracking()
+                                                .Include(t => t.Project)
+                                                .FirstOrDefaultAsync(t => t.Id == ticketId && t.Project!.CompanyId == companyId);
+
+                if (ticket is not null)
+                {
+                    foreach (BTUser member in ticket.Project!.Members)
+                    {
+                        if (await _rolesService.IsUserInRole(member, nameof(BTRoles.Developer)))
+                        {
+                            return member;
+                        }
+                    }
+                }
+
+                return null;
             }
             catch (Exception)
             {
@@ -68,44 +125,15 @@ namespace Debugger.Services
                 throw;
             }
         }
-
-        public async Task<Ticket?> GetTicketByIdAsync(int ticketId, int companyId)
-        {
-            try
-            {
-                return await _context.Tickets.FirstOrDefaultAsync(t => t.Id == ticketId && t.Project!.CompanyId == companyId);
-
-            }
-            catch (Exception)
-            {
-
-                throw;
-            }        }
         public async Task<List<TicketType>> GetTicketTypes()
         {
-            try
-            {
-                return await _context.TicketTypes.ToListAsync();
-
-            }
-            catch (Exception)
-            {
-
-                throw;
-            }        }
+            return await _context.TicketTypes.ToListAsync();
+        }
 
         public async Task<List<TicketPriority>> GetTicketPriorities()
         {
-            try
-            {
-                return await _context.TicketPriorities.ToListAsync();
-
-            }
-            catch (Exception)
-            {
-
-                throw;
-            }        }
+            return await _context.TicketPriorities.ToListAsync();
+        }
 
         public async Task RestoreTicketAsync(Ticket ticket, int companyId)
         {
@@ -188,41 +216,83 @@ namespace Debugger.Services
 
         public async Task<List<TicketStatus>> GetTicketStatuses()
         {
+            return await _context.TicketStatuses.ToListAsync();
+        }
+
+        public async Task<List<Ticket>> GetUnassignedTicketsByCompanyIdAsync(int companyId)
+        {
             try
             {
-                return await _context.TicketStatuses.ToListAsync();
+                List<Ticket> allTickets = await GetTicketsByCompanyIdAsync(companyId);
+                List<Ticket> unassignedProjects = new List<Ticket>();
 
+                foreach (Ticket ticket in allTickets)
+                {
+                    BTUser? ticketDeveloper = await GetTicketDeveloperAsync(ticket.Id, companyId);
+
+                    if (ticketDeveloper is null) unassignedProjects.Add(ticket);
+                }
+                return unassignedProjects;
             }
             catch (Exception)
             {
 
                 throw;
-            }        }
+            }
+        }
 
         public async Task<Ticket?> GetTicketAsNoTrackingAsync(int ticketId, int companyId)
         {
             return await _context.Tickets
                 .AsNoTracking()
                 .Include(t => t.Project)
-                .FirstOrDefaultAsync(t => t.Id == ticketId && t.Project.CompanyId == companyId);
+                .FirstOrDefaultAsync(t => t.Id == ticketId && t.Project!.CompanyId == companyId);
         }
 
-        public Task AddTicketAttachmentAsync(TicketAttachment ticketAttachment)
+        public async Task RemoveTicketDeveloperAsync(int ticketId, int companyId)
         {
-            throw new NotImplementedException();
+            try
+            {
+                Ticket? ticket = await _context.Tickets
+                                               .Include(t => t.Project)
+                                               .ThenInclude(p => p.Members)
+                                               .FirstOrDefaultAsync(t => t.Id == ticketId && t.Project!.CompanyId == companyId);
+
+                if (ticket is not null)
+                {
+                    foreach (BTUser member in ticket.Project!.Members)
+                    {
+                        if (await _rolesService.IsUserInRole(member, nameof(BTRoles.Developer)))
+                        {
+                            ticket.Project.Members.Remove(member);
+                        }
+                    }
+
+                    await _context.SaveChangesAsync();
+                }
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
         }
 
-        public Task<List<Ticket>> GetUnassignedTicketsAsync(int companyId)
+        public async Task AddTicketAttachmentAsync(TicketAttachment ticketAttachment)
         {
-            throw new NotImplementedException();
+            try
+            {
+                await _context.AddAsync(ticketAttachment);
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
         }
 
         public Task AddTicketCommentAsync(TicketComment comment)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<TicketAttachment?> GetTicketAttachmentByIdAsync(int ticketAttachmentId)
         {
             throw new NotImplementedException();
         }

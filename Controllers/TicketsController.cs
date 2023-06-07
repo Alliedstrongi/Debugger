@@ -14,6 +14,8 @@ using Debugger.Extensions;
 using Debugger.Models.Enums;
 using Debugger.Services.Interfaces;
 using System.ComponentModel.Design;
+using Debugger.Services;
+using Debugger.Models.ViewModels;
 
 namespace Debugger.Controllers
 {
@@ -26,8 +28,9 @@ namespace Debugger.Controllers
 		private readonly IBTTicketHistoryService _ticketHistoryService;
 		private readonly IBTProjectService _projectService;
 		private readonly IBTFileService _fileService;
+		private readonly IBTRolesService _rolesService;
 
-		public TicketsController(ApplicationDbContext context, UserManager<BTUser> userManager, IBTTicketService ticketService, IBTTicketHistoryService ticketHistoryService, IBTProjectService projectService, IBTFileService fileService)
+		public TicketsController(ApplicationDbContext context, UserManager<BTUser> userManager, IBTTicketService ticketService, IBTTicketHistoryService ticketHistoryService, IBTProjectService projectService, IBTFileService fileService, IBTRolesService rolesService)
 		{
 			_context = context;
 			_userManager = userManager;
@@ -35,6 +38,7 @@ namespace Debugger.Controllers
 			_ticketHistoryService = ticketHistoryService;
 			_projectService = projectService;
 			_fileService = fileService;
+			_rolesService = rolesService;
 		}
 
 		// GET: Tickets
@@ -72,16 +76,70 @@ namespace Debugger.Controllers
 			return View(nameof(Index), tickets);
 		}
 
-		public async Task<IActionResult> UnassignedTickets()
-		{
-			List<Ticket> tickets = await _ticketService.GetTicketsByCompanyIdAsync(User.Identity!.GetCompanyId());
+        public async Task<IActionResult> UnassignedTickets()
+        {
+            int companyId = User.Identity!.GetCompanyId();
+            List<Ticket> tickets = await _ticketService.GetUnassignedTicketsByCompanyIdAsync(companyId);
 
-			ViewData["Title"] = "Unassigned Tickets";
-			return View(nameof(Index), tickets);
-		}
+            ViewData["Title"] = "Unassigned Tickets";
+            return View(nameof(Index), tickets);
+        }
 
-		// GET: Tickets/Details/5
-		public async Task<IActionResult> Details(int? id)
+        [HttpGet]
+        [Authorize(Roles = $"{nameof(BTRoles.Admin)}, {nameof(BTRoles.ProjectManager)}")]
+        public async Task<IActionResult> AssignDev(int? id)
+        {
+            if (id is null or 0)
+            {
+                return NotFound();
+            }
+
+            int companyId = User.Identity!.GetCompanyId();
+
+            Ticket? ticket = await _ticketService.GetTicketByIdAsync(id.Value, companyId);
+
+            if (ticket is null)
+            {
+                return NotFound();
+            }
+
+            List<BTUser> ticketDevelopers = await _rolesService.GetUsersInRoleAsync(nameof(BTRoles.Developer), companyId);
+            BTUser? currentDev = await _ticketService.GetTicketDeveloperAsync(id.Value, companyId);
+
+            AssignDevViewModel viewModel = new AssignDevViewModel()
+            {
+                Ticket = ticket,
+                DevId = currentDev?.Id,
+                DevList = new SelectList(ticketDevelopers, "Id", "FullName", currentDev?.Id)
+            };
+
+            return View(viewModel);
+        }
+
+        [HttpPost]
+        [Authorize(Roles = $"{nameof(BTRoles.Admin)}, {nameof(BTRoles.ProjectManager)}")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AssignDev(AssignDevViewModel viewModel)
+        {
+            if (viewModel.Ticket?.Id != null)
+            {
+                if (string.IsNullOrEmpty(viewModel.DevId))
+                {
+                    await _ticketService.RemoveTicketDeveloperAsync(viewModel.Ticket.Id, User.Identity!.GetCompanyId());
+                }
+                else
+                {
+                    await _ticketService.AddTicketDeveloperAsync(viewModel.DevId, viewModel.Ticket.Id, User.Identity!.GetCompanyId());
+                }
+
+                return RedirectToAction(nameof(Details), new { id = viewModel.Ticket!.Id });
+            }
+
+            return BadRequest();
+        }
+
+        // GET: Tickets/Details/5
+        public async Task<IActionResult> Details(int? id)
 		{
 			if (id == null || _context.Tickets == null)
 			{
@@ -227,7 +285,7 @@ namespace Debugger.Controllers
 					ticketComment.Created = DateTime.UtcNow;
 					ticketComment.UserId = userId;
 
-					await _ticketService.AddTicketCommentAsync(ticketComment);
+					//await _ticketService.AddTicketCommentAsync(ticketComment);
 
 					await _ticketHistoryService.AddHistoryAsync(ticketComment.TicketId, nameof(TicketComment), ticketComment.UserId);
 				}

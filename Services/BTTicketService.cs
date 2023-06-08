@@ -26,9 +26,17 @@ namespace Debugger.Services
 
         public async Task AddTicketAsync(Ticket ticket)
         {
-            _context.Tickets.Add(ticket);
-            await _context.SaveChangesAsync();
-        }
+			try
+			{
+				_context.Tickets.Add(ticket);
+				await _context.SaveChangesAsync();
+			}
+			catch (Exception)
+			{
+
+				throw;
+			}
+		}
         public async Task<bool> AddTicketDeveloperAsync(string userId, int ticketId, int companyId)
         {
             try

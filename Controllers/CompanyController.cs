@@ -17,6 +17,7 @@ using Debugger.Models.ViewModels;
 
 namespace Debugger.Controllers
 {
+    [Authorize]
     public class CompanyController : Controller
     {
         private readonly IBTCompanyService _companyService;
@@ -30,11 +31,12 @@ namespace Debugger.Controllers
             _userManager = userManager;
         }
 
-        // GET: Companies/Details/5
-        public async Task<IActionResult> Index()
+
+        // GET: Companies/Index/5
+        public async Task<IActionResult> Index(int? id)
         {
             int companyId = User.Identity!.GetCompanyId();
-            Company? company = await _companyService.GetCompanyInfoAsync(companyId);
+            Company company = await _companyService.GetCompanyInfoAsync(companyId);
 
             if (company == null)
             {
@@ -52,6 +54,7 @@ namespace Debugger.Controllers
             List<IdentityRole> roles = await _rolesService.GetRolesAsync();
 
             List<ManageUserRolesViewModel> model = new();
+
             foreach (BTUser member in members)
             {
                 if (member.Id != _userManager.GetUserId(User) && !await _rolesService.IsUserInRole(member, nameof(BTRoles.DemoUser)))
@@ -74,10 +77,10 @@ namespace Debugger.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Roles = nameof(BTRoles.Admin))]
-        public async Task<IActionResult> ManageUserRoles(ManageUserRolesViewModel model)
+        public async Task<IActionResult> ManageUserRoles(ManageUserRolesViewModel viewModel)
         {
-            string? selectedRole = model.SelectedRoles;
-            string? userId = model.User?.Id;
+            string? selectedRole = viewModel.SelectedRoles;
+            string? userId = viewModel.User?.Id;
 
             if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(selectedRole))
             {
@@ -97,7 +100,10 @@ namespace Debugger.Controllers
                 await _rolesService.AddUserToRoleAsync(user, selectedRole);
             }
 
+
+
             return RedirectToAction(nameof(ManageUserRoles));
         }
+
     }
 }

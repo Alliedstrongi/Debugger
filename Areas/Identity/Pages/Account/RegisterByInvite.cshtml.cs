@@ -19,10 +19,12 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
+using Debugger.Services.Interfaces;
+using Debugger.Models.Enums;
 
 namespace Debugger.Areas.Identity.Pages.Account
 {
-    public class RegisterModel : PageModel
+    public class RegisterByInviteModel : PageModel
     {
         private readonly SignInManager<BTUser> _signInManager;
         private readonly UserManager<BTUser> _userManager;
@@ -30,13 +32,19 @@ namespace Debugger.Areas.Identity.Pages.Account
         private readonly IUserEmailStore<BTUser> _emailStore;
         private readonly ILogger<RegisterModel> _logger;
         private readonly IEmailSender _emailSender;
+        private readonly IBTInviteService _inviteService;
+        private readonly IBTProjectService _projectService;
+        private readonly IBTRolesService _rolesService;
 
-        public RegisterModel(
+        public RegisterByInviteModel(
             UserManager<BTUser> userManager,
             IUserStore<BTUser> userStore,
             SignInManager<BTUser> signInManager,
             ILogger<RegisterModel> logger,
-            IEmailSender emailSender)
+            IEmailSender emailSender,
+            IBTInviteService inviteService,
+            IBTProjectService projectService,
+            IBTRolesService rolesService)
         {
             _userManager = userManager;
             _userStore = userStore;
@@ -44,6 +52,9 @@ namespace Debugger.Areas.Identity.Pages.Account
             _signInManager = signInManager;
             _logger = logger;
             _emailSender = emailSender;
+            _inviteService = inviteService;
+            _projectService = projectService;
+            _rolesService = rolesService;
         }
 
         /// <summary>
@@ -107,22 +118,54 @@ namespace Debugger.Areas.Identity.Pages.Account
             [Display(Name = "Confirm password")]
             [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
             public string ConfirmPassword { get; set; }
+
+            [Required]
+            public int CompanyId { get; set; }
+
+            public string Company { get; set; }
+
+            [Required]
+            public string Token { get; set; }
         }
 
 
-        public async Task OnGetAsync(string returnUrl = null)
+        public async Task OnGetAsync(string token, int companyId, int Id, string returnUrl = null)
         {
             ReturnUrl = returnUrl;
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
+
+            Invite invite = await _inviteService.GetInviteAsync(Id, companyId);
+
+            Input.Email = invite.InviteeEmail;
+            Input.FirstName = invite.InviteeFirstName;
+            Input.LastName = invite.InviteeLastName;
+            Input.Company = invite.Company.Name;
+            Input.CompanyId = invite.CompanyId;
+            Input.Token = token;
         }
 
         public async Task<IActionResult> OnPostAsync(string returnUrl = null)
         {
             returnUrl ??= Url.Content("~/");
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
-            if (ModelState.IsValid)
+
+            Invite invite = await _inviteService.GetInviteAsync(Guid.Parse(Input.Token), Input.Email, Input.CompanyId);
+
+            if (invite == null || await _inviteService.ValidateInviteCodeAsync(invite.CompanyToken) == false)
             {
-                var user = CreateUser();
+                ModelState.AddModelError(string.Empty, "Invalid invite link. Please contact the company owner for a new invite.");
+            }
+
+
+            if (ModelState.IsValid) 
+            { 
+                BTUser user = new()
+                {
+                    FirstName = Input.FirstName,
+                    LastName = Input.LastName,
+                    Email = Input.Email,
+                    CompanyId = Input.CompanyId,
+                };
 
                 await _userStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
                 await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
@@ -130,9 +173,19 @@ namespace Debugger.Areas.Identity.Pages.Account
 
                 if (result.Succeeded)
                 {
+                    if (invite.ProjectId is not null or 0)
+                    {
+                        await _projectService.AddMemberToProjectAsync(user, invite.ProjectId.Value, user.CompanyId);
+                    }
+
+                    await _userManager.AddToRoleAsync(user, nameof(BTRoles.Submitter));
+
                     _logger.LogInformation("User created a new account with password.");
 
                     var userId = await _userManager.GetUserIdAsync(user);
+
+                    await _inviteService.AcceptInviteAsync(invite.CompanyToken, userId, invite.CompanyId);
+
                     var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
                     code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
                     var callbackUrl = Url.Page(
@@ -162,20 +215,6 @@ namespace Debugger.Areas.Identity.Pages.Account
 
             // If we got this far, something failed, redisplay form
             return Page();
-        }
-
-        private BTUser CreateUser()
-        {
-            try
-            {
-                return Activator.CreateInstance<BTUser>();
-            }
-            catch
-            {
-                throw new InvalidOperationException($"Can't create an instance of '{nameof(BTUser)}'. " +
-                    $"Ensure that '{nameof(BTUser)}' is not an abstract class and has a parameterless constructor, or alternatively " +
-                    $"override the register page in /Areas/Identity/Pages/Account/Register.cshtml");
-            }
         }
 
         private IUserEmailStore<BTUser> GetEmailStore()

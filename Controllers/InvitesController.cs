@@ -20,28 +20,30 @@ namespace Debugger.Controllers
     [Authorize(Roles = nameof(BTRoles.Admin))]
     public class InvitesController : Controller
     {
-        private readonly ApplicationDbContext _context;
         private readonly IBTInviteService _inviteService;
         private readonly IBTProjectService _projectService;
         private readonly IBTCompanyService _companyService;
         private readonly IEmailSender _emailSender;
-        private readonly UserManager<BTUser> _userManager;
         private readonly IDataProtector _protector;
         private readonly string _protectorPurpose;
+        private readonly UserManager<BTUser> _userManager;
 
-        public InvitesController(ApplicationDbContext context, IBTInviteService inviteService, IBTProjectService projectService, IBTCompanyService companyService, IEmailSender emailSender, UserManager<BTUser> userManager, IDataProtectionProvider protectionProvider)
+        public InvitesController(IBTInviteService inviteService,
+                                 IBTProjectService projectService,
+                                 IBTCompanyService companyService,
+                                 IEmailSender emailSender,
+                                 UserManager<BTUser> userManager,
+                                 IDataProtectionProvider protectionProvider)
         {
-            _context = context;
             _inviteService = inviteService;
             _projectService = projectService;
             _companyService = companyService;
             _emailSender = emailSender;
             _userManager = userManager;
 
-            _protectorPurpose = "DCTaylor1274!";
+            _protectorPurpose = "Bug!@I$$Dee4723??";
             _protector = protectionProvider.CreateProtector(_protectorPurpose);
         }
-
 
         // GET: Invites/Create
         public async Task<IActionResult> Create()
@@ -49,6 +51,7 @@ namespace Debugger.Controllers
             List<Project> companyProjects = await _projectService.GetAllProjectsByCompanyIdAsync(User.Identity!.GetCompanyId());
 
             ViewData["ProjectId"] = new SelectList(companyProjects, "Id", "Name");
+
             return View();
         }
 
@@ -60,7 +63,6 @@ namespace Debugger.Controllers
         public async Task<IActionResult> Create([Bind("ProjectId,InviteeEmail,InviteeFirstName,InviteeLastName,Message")] Invite invite)
         {
             int companyId = User.Identity!.GetCompanyId();
-
             ModelState.Remove(nameof(Invite.InvitorId));
 
             if (ModelState.IsValid)
@@ -77,22 +79,24 @@ namespace Debugger.Controllers
 
                     await _inviteService.AddNewInviteAsync(invite);
 
+                    // send the invite email
+
+                    // encrypting our top secret ivite information
                     string token = _protector.Protect(guid.ToString());
                     string email = _protector.Protect(invite.InviteeEmail!);
                     string company = _protector.Protect(companyId.ToString());
 
-                    string? callbackUrl = Url.Action("ProcessInvite", "Invites", new { token, email, company }, Request.Scheme);
+                    string? callbackUrl = Url.Action("ProcessInvite", "Invites", new { token, email, company });
 
-                    string body = $@"<h4>You've been invited to join the bug tracker!!!</h4><br />
-                                    {invite.Message}<br /><br />
-                                    <a href""{callbackUrl}"">Click Here!</a> to join our team.";
+                    string body = $@"<h4>You've been invited to join the BugEyeD bug tracker!</h4><br />
+                                         {invite.Message}<br /><br />
+                                         <a href=""{callbackUrl}"">Click here</a> to join our team.";
 
-                    string subject = "You've been invited to join Debugger!";
+                    string subject = "You've been invite to join BugEyeD Bug Tracker";
 
                     await _emailSender.SendEmailAsync(invite.InviteeEmail!, subject, body);
 
-                    return RedirectToAction("Index", "Home", new { SwalMessage = "Invite Sent!"});
-
+                    return RedirectToAction("Index", "Home");
                 }
                 catch (Exception)
                 {
@@ -106,5 +110,37 @@ namespace Debugger.Controllers
             return View(invite);
         }
 
+
+        public async Task<IActionResult> ProcessInvites(string? token, string? email, string? company)
+        {
+            if (string.IsNullOrEmpty(token) || string.IsNullOrEmpty(email) || string.IsNullOrEmpty(company))
+            {
+                return NotFound();
+            }
+
+            Guid companyToken = Guid.Parse(_protector.Unprotect(token));
+            string inviteeEmail = _protector.Unprotect(email);
+            int companyId = int.Parse(_protector.Unprotect(company));
+
+            try
+            {
+                Invite? invite = await _inviteService.GetInviteAsync(companyToken, inviteeEmail, companyId);
+
+                if (invite == null)
+                {
+                    return NotFound();
+                }
+
+                return View(invite);
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+
+            return View();
+
+        }
     }
 }

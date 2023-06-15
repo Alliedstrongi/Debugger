@@ -29,34 +29,88 @@
 	<script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
 	<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
 	<![endif]-->
+
+    <style>
+        .header-logo img {
+            max-height: 100%;
+            max-width: 100%;
+        }
+
+        .header-logo a {
+            display: flex;
+            align-items: center;
+            height: 100%;
+        }
+
+        .header-logo .logo {
+            width: 125px;
+            height: auto;
+            max-height: 125px; 
+            object-fit: contain;
+        }
+    </style>
+
+    <style>
+        /* Preloader CSS */
+        .preloader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #d9d9d8;
+            z-index: 9999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .preloader-gif {
+            width: 500px;
+            height: 500px;
+            background-image: url('/img/Debugger.gif');
+            background-size: cover;
+        }
+
+        /* Footer CSS */
+        .footer {
+            position: fixed;
+            left: 0;
+            bottom: 0;
+            width: 100%;
+            background-color: rgba(80, 102, 225, 0.5);
+            text-align: center;
+            padding: 20px;
+        }
+    </style>
+
 </head>
 <body>
-	<div class="content-wrapper">
-		<!-- Preloader -->
-		<div class="preloader">
-			<div class="preloader-icon"></div>
-			<span>Loading...</span>
-		</div>
-		<!-- ./ Preloader -->
-		<!-- Layout wrapper -->
-		<div class="layout-wrapper">
+    <div class="content-wrapper">
+        <!-- Preloader HTML -->
+        <div class="preloader">
+            <div class="preloader-gif"></div>
+        </div>
+        <!-- ./ Preloader -->
+        <!-- Layout wrapper -->
+        <div class="layout-wrapper">
 
-			<!-- Header -->
-			<div class="header d-print-none">
-				<div class="header-container">
-					<div class="header-left">
-						<div class="navigation-toggler">
-							<a href="#" data-action="navigation-toggler">
-								<i data-feather="menu"></i>
-							</a>
-						</div>
+            <!-- Header -->
+            <div class="header d-print-none">
+                <div class="header-container">
+                    <div class="header-left">
+                        <div class="navigation-toggler">
+                            <a href="#" data-action="navigation-toggler">
+                                <i data-feather="menu"></i>
+                            </a>
+                        </div>
 
-						<div class="header-logo">
-							<a asp-area="" asp-controller="Home" asp-action="Index">
-								<img class="logo" src="../../assets/media/image/logo.png" alt="logo">
-							</a>
-						</div>
-					</div>
+                        <div class="header-logo">
+                            <a asp-area="" asp-controller="Home" asp-action="Index">
+                                <img class="logo" src="/img/Debugger.png" alt="logo">
+                            </a>
+                        </div>
+                    </div>
 
 					<div class="header-body">
 						<div class="header-body-left">
@@ -79,7 +133,7 @@
 									</a>
 								</li>
 								<li class="nav-item">
-									<a href="#" title="Cart" class="nav-link" data-toggle="dropdown">
+									<a href="#" title="Open Tickets" class="nav-link" data-toggle="dropdown">
 										<i data-feather="shopping-bag"></i>
 									</a>
 									<div class="dropdown-menu dropdown-menu-right dropdown-menu-big">
@@ -156,20 +210,8 @@
 											</div>
 										</div>
 										<div class="px-4 py-3 border-top text-right small">
-											<p class="d-flex justify-content-between align-items-center mb-1">
-												<span>Sub Total</span>
-												<span>$1,650</span>
-											</p>
-											<p class="d-flex justify-content-between align-items-center mb-1">
-												<span>Taxes</span>
-												<span>$15</span>
-											</p>
-											<p class="d-flex justify-content-between align-items-center mb-1 font-weight-bold">
-												<span>Total</span>
-												<span>$1,665</span>
-											</p>
-											<button class="btn btn-primary btn-block mt-2">
-												Order and Payment <i class="ti-arrow-right ml-2"></i>
+											<button class="btn btn-primary btn-block mt-2" >
+												View All Tickets <i class="ti-arrow-right ml-2"></i>
 											</button>
 										</div>
 									</div>
@@ -204,7 +246,7 @@
 							<li>
 								<a asp-area="" asp-controller="Home" asp-action="Index">
 									<span class="nav-link-icon">
-										<i data-feather="pie-chart"></i>
+                                        <i data-feather="image"></i>
 									</span>
 									<span>Home Menu</span>
 								</a>
@@ -284,9 +326,9 @@
 						</div>
 					</div>
 				</div>
-				@*<!-- Footer -->
-				<footer class="content-footer">
-				<div>© 2023 Dylan Taylor - <a href="http://DylanTaylor-Portfolio.Netflify.com" target="_blank">Portfolio</a></div>
+				<!-- Footer -->
+				<footer class="content-footer footer">
+                    <div>© 2023 Dylan Taylor - <a href="https://dylantaylor-portfolio.netlify.app" target="_blank">Portfolio</a></div>
 				<div>
 				<nav class="nav">
 				<a href="https://themeforest.net/licenses/standard" class="nav-link">Licenses</a>
@@ -295,7 +337,7 @@
 				</nav>
 				</div>
 				</footer>
-				<!-- ./ Footer -->*@
+				<!-- ./ Footer -->
 			</div>
 			<!-- ./ Content body -->
 		</div>

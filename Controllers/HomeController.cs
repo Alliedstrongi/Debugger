@@ -1,10 +1,12 @@
 ﻿using System.Diagnostics;
 using Debugger.Models;
 using Debugger.Models.ViewModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Debugger.Controllers
 {
+    [Authorize]
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;

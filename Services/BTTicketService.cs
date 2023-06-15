@@ -97,12 +97,39 @@ namespace Debugger.Services
         }
         public async Task<List<Ticket>> GetTicketsByCompanyIdAsync(int companyId)
         {
-            return await _context.Tickets.Where(t => t.Project!.CompanyId == companyId).ToListAsync();
+            try
+            {
+                return await _context.Tickets.Where(t => t.Project!.CompanyId == companyId).ToListAsync();
+
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }       
         }
 
         public async Task<Ticket?> GetTicketByIdAsync(int ticketId, int companyId)
         {
-            return await _context.Tickets.FirstOrDefaultAsync(t => t.Id == ticketId && t.Project!.CompanyId == companyId);
+            try
+            {
+                return await _context.Tickets.Include(t => t.Project)
+                                             .Include(t => t.TicketPriority)
+                                             .Include(t => t.TicketType)
+                                             .Include(t => t.TicketStatus)
+                                             .Include(t => t.DeveloperUser)
+                                             .Include(t => t.SubmitterUser)
+                                             .Include(t => t.Comments)
+                                             .Include(t => t.Attachments)
+                                             .Include(t => t.History)
+                                             .FirstOrDefaultAsync(t => t.Id == ticketId && t.Project!.CompanyId == companyId);
+
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }        
         }
 
         public async Task<BTUser?> GetTicketDeveloperAsync(int ticketId, int companyId)
@@ -300,9 +327,18 @@ namespace Debugger.Services
             }
         }
 
-        public Task AddTicketCommentAsync(TicketComment comment)
+        public async Task AddTicketCommentAsync(TicketComment comment)
         {
-            throw new NotImplementedException();
+            try
+            {
+                await _context.AddAsync(comment);
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
         }
     }
 }

@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Debugger.Data;
 using Debugger.Models;
 using Microsoft.AspNetCore.Identity;
+using Debugger.Services.Interfaces;
 
 namespace Debugger.Controllers
 {
@@ -15,11 +16,13 @@ namespace Debugger.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly UserManager<BTUser> _userManager;
+        private readonly IBTTicketService _ticketService;
 
-        public TicketCommentsController(ApplicationDbContext context, UserManager<BTUser> userManager)
+        public TicketCommentsController(ApplicationDbContext context, UserManager<BTUser> userManager, IBTTicketService ticketService)
         {
             _context = context;
             _userManager = userManager;
+            _ticketService = ticketService;
         }
 
         // GET: TicketComments
@@ -62,7 +65,7 @@ namespace Debugger.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Comment,Created,TicketId,UserId")] TicketComment ticketComment)
+        public async Task<IActionResult> Create([Bind("Id,Comment,TicketId")] TicketComment ticketComment)
         {
             ModelState.Remove("UserId");
 
@@ -71,9 +74,9 @@ namespace Debugger.Controllers
                 ticketComment.Created = DateTime.UtcNow;
                 ticketComment.UserId = _userManager.GetUserId(User);
 
-                Ticket ticket = await _context.Tickets.FirstOrDefaultAsync(c => c.Id == ticketComment.TicketId);
+                await _ticketService.AddTicketCommentAsync(ticketComment);
 
-                return RedirectToAction("Details", "Tickets");
+                return RedirectToAction("Details", "Tickets", new { id = ticketComment.TicketId });
             }
             ViewData["TicketId"] = new SelectList(_context.Tickets, "Id", "Description", ticketComment.TicketId);
             ViewData["UserId"] = new SelectList(_context.Users, "Id", "Id", ticketComment.UserId);
